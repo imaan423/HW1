@@ -22,4 +22,4 @@ Fork this repository.
 
 To work on it, clone the repository and make edits and commits. Push them to your clone of the repository.
 
-Submit the link to YOUR repository clone to the assignment for **HW 1** on the SI 364 Canvas site.
+Submit the link to YOUR repository clone to the assignment for **HW 1** on the SI 364 Canvas site
