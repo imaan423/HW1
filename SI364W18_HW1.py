@@ -1,27 +1,40 @@
 ## HW 1
 ## SI 364 W18
 ## 1000 points
-
+## Imaan Munir
 #################################
 
 ## List below here, in a comment/comments, the people you worked with on this assignment AND any resources you used to find code (50 point deduction for not doing so). If none, write "None".
 
+ ## https://www.programcreek.com/python/example/58915/flask.jsonify - learned how to use jsonify (for line 39)
 
 
 ## [PROBLEM 1] - 150 points
 ## Below is code for one of the simplest possible Flask applications. Edit the code so that once you run this application locally and go to the URL 'http://localhost:5000/class', you see a page that says "Welcome to SI 364!"
-
 from flask import Flask
+from flask import jsonify
+from flask import request
+import tweepy
+import json
+import requests
+
 app = Flask(__name__)
 app.debug = True
 
 @app.route('/')
 def hello_to_you():
-    return 'Hello!'
+	return 'Hello!'
 
+@app.route('/class')
+def welcome():
+	return 'Welcome to SI 364!'
 
-if __name__ == '__main__':
-    app.run()
+@app.route('/movie/<moviename>')
+def getMovie(moviename):
+	itunes = "https://itunes.apple.com/search?term=" 
+	url = itunes + moviename
+	s = requests.get(url).text
+	return jsonify(s)
 
 
 ## [PROBLEM 2] - 250 points
@@ -46,6 +59,43 @@ if __name__ == '__main__':
 ## You can assume a user will always enter a number only.
 
 
+@app.route('/question/', methods=['GET', 'POST'])
+def number_double():
+	if request.method == 'POST':
+		if 'fave' in request.form:
+			number = int(request.form['fave'])
+			number *= 2
+
+			s = """
+			<!DOCTYPE html>
+			<html>
+			<body>
+				<p>Double your favorite number is: {}</p>
+			</form>
+			</body>
+			</html>
+			""".format(number)
+
+			return s
+
+	s = """
+	<!DOCTYPE html>
+	<html>
+	<body>
+		<form action="/question/" method="POST">
+			ENTER YOUR FAVORITE NUMBER:
+			<br>
+				<input type="text" name="fave" value="Enter text">
+			</br>
+		<input type="submit" value="Submit">
+	</form>
+	</body>
+	</html>
+	"""
+
+	return s
+
+
 ## [PROBLEM 4] - 350 points
 
 ## Come up with your own interactive data exchange that you want to see happen dynamically in the Flask application, and build it into the above code for a Flask application, following a few requirements.
@@ -65,3 +115,62 @@ if __name__ == '__main__':
 # You can assume that a user will give you the type of input/response you expect in your form; you do not need to handle errors or user confusion. (e.g. if your form asks for a name, you can assume a user will type a reasonable name; if your form asks for a number, you can assume a user will type a reasonable number; if your form asks the user to select a checkbox, you can assume they will do that.)
 
 # Points will be assigned for each specification in the problem.
+
+@app.route('/problem4form/', methods=['GET', 'POST'])
+def book_search():
+
+	if request.method == 'POST':
+		if 'username' in request.form:
+			username = request.form['username']
+		if 'ten' in request.form:
+			num_results = 10
+		elif 'twenty' in request.form:
+			num_results = 20
+		else:
+			num_results = 0
+
+                # twitter info 
+		consumer_key = "rz3PrveRdEbFMCSByKhBQhKhF"
+		consumer_secret = "Lxp0LGPXhpfq3uQuoGt77OkAk0YFuerXh5x6k18mRVfUk9S5do"
+		access_token = "483251760-wFofFRt9LudmLjjnoSwWY4xmMWLZNlhecTrsgrix"
+		access_token_secret = "EeDgi014SGBlZ8LF9xoNgh8vQ24I9ZPY4rl0CPyZIZvcP"
+
+		auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+		auth.set_access_token(access_token, access_token_secret)
+		api = tweepy.API(auth, parser=tweepy.parsers.JSONParser())
+
+		twitter_results = api.user_timeline(username)
+
+		results = []
+
+		s = ""
+
+		for i in range(num_results):
+			s += twitter_results[i]['text']
+			s += "<br></br>"
+
+		return s
+
+
+	s = """
+	<!DOCTYPE html>
+	<html>
+	<body>
+		<form action="/problem4form/" method="POST">
+			Enter twitter username:
+			<br>
+				<input type="text" name="username" value="Enter text">
+				<br></br>
+				<input type="checkbox" name="ten" value="ten"> I want ten results.<br>
+				<input type="checkbox" name="twenty" value="twenty"> I want twenty results.<br>
+			</br>
+		<input type="submit" value="Submit">
+	</form>
+	</body>
+	</html>
+	"""
+	return s
+
+
+if __name__ == '__main__':
+	app.run()
